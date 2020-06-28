@@ -3,7 +3,7 @@ R.inject_variables()
 e=SymmetricFunctions(R).e();
 
 
-#    Code for algorithm 2.7 in 	arXiv:2006.08418
+#    Code for algorithm 2.7 in 	arXiv:2006.00657 
 #    Input is a non decreasing tuple A of length n such that i<= A[i] <= n-1
 #
 
