@@ -1,0 +1,136 @@
+R=QQ['t'].fraction_field();
+R.inject_variables()
+e=SymmetricFunctions(R).e();
+
+
+#    Code for algorithm 2.7 in 	arXiv:2006.08418
+#    Input is a non decreasing tuple A of length n such that i<= A[i] <= n-1
+#
+
+
+
+
+#   
+#    
+#
+def split(A):
+    i=0
+    while i<len(A)-1 and A[i]>i:
+        i=i+1
+    return i
+
+#
+# computes the first i where A is not aligned
+#
+def al(A):
+    i=0
+    B=list(A)
+    B.append(len(A)-1)
+    while i<len(A)-1 and (B[B[i]]<B[B[i]+1] or B[B[i]]==len(A)-1):
+        i=i+1
+    return i
+
+def peak(A):
+    i=len(A)-1
+    while A[i]==len(A)-1:
+        i=i-1
+    a=A[i]
+    while A[i]==a:
+        i=i-1
+    return i+1
+
+def next(A,i):
+    k=i
+    B=list(A)
+    B.append(len(A))
+    B.append(len(A))
+    while B[k]==A[i]:
+        k=k+1
+    return k
+
+def red(A,i):
+    B=list(A)
+    j=i
+    a=next(A,i)
+    while j<a:
+        B[j]=A[i]-1
+        j=j+1
+    return tuple(B)
+
+def redm(A,i):
+    B=list(red(A,i))
+    a=next(A,i)
+    if A[a]==len(A)-1:
+        B[a-1]=len(A)-1
+    else:
+        B[a-1]=min(next(A,A[i])-1,A[next(A,i)])
+    return tuple(B)
+
+
+def m(A,i):
+    j=0
+    B=list(A)
+    while j<len(B):
+        B[j]=B[j]-i
+        j=j+1
+    return tuple(B)
+
+@cached_function
+def Fi(j,i):
+    P=1;
+    for k in range(j+1,i):
+        P=P*(t^k-1)
+    return P
+
+@chached_function
+def G(n):  
+    L=[1];
+    for i in range(1,n+1):
+        H=0;
+        for j in range(i):
+            H=H+L[j]*e[i-j]*Fi(j,i)
+        L.append(H)
+    return L[n]
+
+@cached_function
+def LLT(A):
+    if A[0]==len(A)-1:
+        return G(len(A))
+    else:
+        if split(A)<len(A)-1:
+            return LLT(A[:split(A)+1])*LLT(m(A[split(A)+1:],split(A)+1))
+        else:
+            a=al(A)
+            p=peak(A)
+            l=len(A)
+            n=next(A,p)
+            n1=next(A,a)
+            if a==l-1:
+                return (1-((t^(n-p)-1)/(t^(l-A[p])-1)))*LLT(red(A,p))+((t^(n-p)-1)/(t^(l-A[p])-1))*LLT(redm(A,p))
+            else:
+                return (1-((t^(n1-a)-1)/(t^(min(next(A,A[a])-A[a],A[next(A,a)]-A[a]+1))-1)))*LLT(red(A,a))+ ((t^(n1-a)-1)/(t^(min(next(A,A[a])-A[a],A[next(A,a)]-A[a]+1))-1))*LLT(redm(A,a))
+
+@cached_function
+def F(n):
+    X=1;
+    for i in range(2,n+1):
+        X=X*(t^i-1)/(t-1)
+    return X
+    
+@cached_function
+def QCSF(A):
+    if A[0]==len(A)-1:
+        return F(len(A))*e[len(A)]
+    else:
+        if split(A)<len(A)-1:
+            return QCSF(A[:split(A)+1])*QCSF(m(A[split(A)+1:],split(A)+1))
+        else:
+            a=al(A)
+            p=peak(A)
+            l=len(A)
+            n=next(A,p)
+            n1=next(A,a)
+            if a==l-1:
+                return (1-((t^(n-p)-1)/(t^(l-A[p])-1)))*QCSF(red(A,p))+((t^(n-p)-1)/(t^(l-A[p])-1))*QCSF(redm(A,p))
+            else:
+                return (1-((t^(n1-a)-1)/(t^(min(next(A,A[a])-A[a],A[next(A,a)]-A[a]+1))-1)))*QCSF(red(A,a))+ ((t^(n1-a)-1)/(t^(min(next(A,A[a])-A[a],A[next(A,a)]-A[a]+1))-1))*QCSF(redm(A,a))
