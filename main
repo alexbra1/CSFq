@@ -10,18 +10,14 @@ e=SymmetricFunctions(R).e();
 
 
 
-#   
-#    
-#
+
 def split(A):
     i=0
     while i<len(A)-1 and A[i]>i:
         i=i+1
     return i
 
-#
-# computes the first i where A is not aligned
-#
+
 def al(A):
     i=0
     B=list(A)
